@@ -26,6 +26,7 @@ var Logger = require('./logger')
 var utils = require('./utils')
 var WebDriverActionWrapper = require('./execution_module/action_wrapper')
 var PageStepsBuilder = require('./execution_module/page_steps_builder')
+var reporter
 
 var JUnitBuilder = require('./junit_reporter')
 var lightHouseArr
@@ -34,6 +35,8 @@ var baseUrl
 var scenarioIter
 var consoleLogger
 var UserFeeders
+
+var recordScreen = require('record-screen')
 
 function ScenarioBuilder(test_name, influxConfig, reportPortalConfig, lightHouseDevice, suite, consoleLogger, UserFeeders) {
     try { this.testName = test_name.replace(/\.y.?ml/g, '') }
@@ -47,6 +50,7 @@ function ScenarioBuilder(test_name, influxConfig, reportPortalConfig, lightHouse
     this.junit = new JUnitBuilder(this.testName)
     this.lightHouseArr = lightHouseDevice
     this.UserFeeders = UserFeeders
+    this.reporter = require('./report_module/page_audit')
 }
 
 ScenarioBuilder.prototype.InitDriver = async function () {
@@ -102,16 +106,28 @@ ScenarioBuilder.prototype.TestStepsExecute = async function (page_name, urlWithP
     }
     await outer_this.driver.sleep(200)
         .then(() => { outer_this.consoleLogger.info("Opening " + page_name + " TestCase (" + iteration + ")") })
-        .then(() => outer_this.ExecuteTest(baseUrl, pageCheck, stepList))
+        .then(() => outer_this.ExecuteTest(baseUrl, pageCheck, stepList, page_name))
         .catch((error) => { return error })
         .then((error) => outer_this.ResultReport(page_name, baseUrl, parameters, lh_name, error))
 }
 
-ScenarioBuilder.prototype.ExecuteTest = async function (baseUrl, pageCheck, stepList) {
+ScenarioBuilder.prototype.ExecuteTest = async function (baseUrl, pageCheck, stepList, page_name) {
     var locator;
     var actionStep;
     var outer_this = this
     var previousUrl = outer_this.previousUrl
+
+    this.video = recordScreen('/tmp/reports/'+page_name+ '.mp4', {resolution: '1440x900'})
+    this.video.promise
+    .then(result => {
+      // Screen recording is done
+      process.stdout.write(result.stdout)
+      process.stderr.write(result.stderr)
+    })
+    .catch(error => {
+      // Screen recording has failed
+      console.error(error)
+    })
 
     if (scenarioIter == 1 || previousUrl != baseUrl || outer_this.driver) {
         outer_this.consoleLogger.debug("Open " + baseUrl)
@@ -163,13 +179,14 @@ ScenarioBuilder.prototype.ExecuteTest = async function (baseUrl, pageCheck, step
         outer_this.consoleLogger.debug("Page state is " + pageState)
     }
     while (pageState == "complite")
-
+    this.video.stop()
 }
-
 ScenarioBuilder.prototype.ResultReport = async function (pageName, pageUrl, parameter, lh_name, error) {
     var outer_this = this;
     var isAction
     var status
+
+    outer_this.reporter.runPageAudit(outer_this.driver,pageName)
 
     if (error) {
         outer_this.consoleLogger.error(`Test Case ${pageName} failed.`)
