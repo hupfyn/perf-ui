@@ -29,6 +29,7 @@ RUN apt-get -qqy update \
   fonts-tlwg-loma-otf \
   ttf-ubuntu-font-family \
   supervisor \
+  ffmpeg \
   && rm -rf /var/lib/apt/lists/* \
   && sed -i 's/securerandom\.source=file:\/dev\/random/securerandom\.source=file:\/dev\/urandom/' ./usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/java.security
 

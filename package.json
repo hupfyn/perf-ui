@@ -8,6 +8,7 @@
         "chromedriver": "2.38.3",
         "cookie-parse": "^0.4.0",
         "ffmpeg": "0.0.4",
+        "ffmpeg-extract-frames": "^2.0.2",
         "fs": "0.0.1-security",
         "fs-extra": "6.0.1",
         "influxdb-nodejs": "2.7.7",
@@ -25,7 +26,6 @@
         "reportportal-client": "5.1.0",
         "request": "2.87.0",
         "request-promise": "^4.2.4",
-        "selenium-webdriver": "3.6.0",
-        "webcoach": "^3.6.0"
+        "selenium-webdriver": "3.6.0"
     }
 }

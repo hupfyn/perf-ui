@@ -20,6 +20,8 @@ const { By,
 
 require('chromedriver');
 
+var util = require('util')
+var Executor = util.promisify(require('child_process').exec)
 var Waiter = require("./waiters")
 var Lighthouse = require('./lighthouse')
 var Logger = require('./logger')
@@ -27,6 +29,7 @@ var utils = require('./utils')
 var WebDriverActionWrapper = require('./execution_module/action_wrapper')
 var PageStepsBuilder = require('./execution_module/page_steps_builder')
 var reporter
+var extractFrames = require('ffmpeg-extract-frames')
 
 var JUnitBuilder = require('./junit_reporter')
 var lightHouseArr
@@ -59,19 +62,19 @@ ScenarioBuilder.prototype.InitDriver = async function () {
         .setAlertBehavior('accept')
         .forBrowser('chrome').build();
     outer_this.waiter = new Waiter(this.driver)
-    await outer_this.driver.get("chrome://version");
-    let element = await outer_this.driver.findElement(By.id('command_line'));
-    let text = await element.getText();
-    var splitStr = text.split(" ");
-    let port = 0
-    splitStr.filter(function (word, index) {
-        if (word.match(/--remote-debugging-port=*/)) {
-            port = Number(word.split('=')[1]);
-            lighthouseOptionsDesktop.port = port;
-            lighthouseOptionsMobile.port = port;
-            outer_this.consoleLogger.debug("Using " + port + " port for debug")
-        } else { }
-    });
+    // await outer_this.driver.get("chrome://version");
+    // let element = await outer_this.driver.findElement(By.id('command_line'));
+    // let text = await element.getText();
+    // var splitStr = text.split(" ");
+    // let port = 0
+    // splitStr.filter(function (word, index) {
+    //     if (word.match(/--remote-debugging-port=*/)) {
+    //         port = Number(word.split('=')[1]);
+    //         lighthouseOptionsDesktop.port = port;
+    //         lighthouseOptionsMobile.port = port;
+    //         outer_this.consoleLogger.debug("Using " + port + " port for debug")
+    //     } else { }
+    // });
 }
 
 var lighthouseOptionsDesktop = {
@@ -116,18 +119,11 @@ ScenarioBuilder.prototype.ExecuteTest = async function (baseUrl, pageCheck, step
     var actionStep;
     var outer_this = this
     var previousUrl = outer_this.previousUrl
+    var videoPath = '/tmp/reports/'+page_name+ '.mp4'
 
-    this.video = recordScreen('/tmp/reports/'+page_name+ '.mp4', {resolution: '1440x900'})
-    this.video.promise
-    .then(result => {
-      // Screen recording is done
-      process.stdout.write(result.stdout)
-      process.stderr.write(result.stderr)
-    })
-    .catch(error => {
-      // Screen recording has failed
-      console.error(error)
-    })
+    var startMark = new Date().getTime()
+    this.video = recordScreen(videoPath, {resolution: '1440x900',fps:25, display:20})
+    this.video.promise.catch(error => {console.error(error)})
 
     if (scenarioIter == 1 || previousUrl != baseUrl || outer_this.driver) {
         outer_this.consoleLogger.debug("Open " + baseUrl)
@@ -179,7 +175,30 @@ ScenarioBuilder.prototype.ExecuteTest = async function (baseUrl, pageCheck, step
         outer_this.consoleLogger.debug("Page state is " + pageState)
     }
     while (pageState == "complite")
-    this.video.stop()
+    var endMark = new Date().getTime()
+    await this.video.stop()
+    var navtime = await outer_this.driver.executeScript('return performance.timing').then((result)=>{return result})
+    var loadEventEnd = navtime.loadEventEnd - navtime.navigationStart
+    var cuterStart = (navtime.navigationStart-startMark)/1000
+    if (cuterStart<10){
+        cuterStart = "0"+cuterStart
+    }
+    var cutterComand = 'ffmpeg -i '+ videoPath +' -ss 00:00:'+cuterStart+'  /tmp/reports/'+page_name+'_short.mp4 -y'
+    var resultTimestampFrame = []
+    var duration = endMark - navtime.navigationStart
+    var cuterIterator = Math.floor(duration / 7)
+    for (let index = cuterIterator;  resultTimestampFrame.length < 6 ; index = index + cuterIterator){
+        resultTimestampFrame.push(index)    
+    }
+    resultTimestampFrame.push(loadEventEnd)
+    utils.sleep(5)
+    await Executor(cutterComand)
+    utils.sleep(2)
+    await extractFrames({
+        input: '/tmp/reports/'+page_name+'_short.mp4',
+        output: '/tmp/reports/frame/'+page_name+'%d.jpg',
+        offsets: resultTimestampFrame
+    })    
 }
 ScenarioBuilder.prototype.ResultReport = async function (pageName, pageUrl, parameter, lh_name, error) {
     var outer_this = this;
@@ -187,6 +206,8 @@ ScenarioBuilder.prototype.ResultReport = async function (pageName, pageUrl, para
     var status
 
     outer_this.reporter.runPageAudit(outer_this.driver,pageName)
+                        .then((status)=>{outer_this.consoleLogger.info(status)})
+                        .catch((err)=> { outer_this.consoleLogger.error(err.message); outer_this.consoleLogger.debug(err)})
 
     if (error) {
         outer_this.consoleLogger.error(`Test Case ${pageName} failed.`)
