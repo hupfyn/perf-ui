@@ -1,5 +1,3 @@
-include ./_tableMixins
-
 mixin adviceInfo(name, id, perfectScore, node)
   a(id=id)
   h3 #{name} (#{node.score})
@@ -104,6 +102,39 @@ html
         } 
         elem = null
       }, 100);
+    script(type='text/javascript').
+      google.charts.load('current', {'packages':['timeline']});
+      google.charts.setOnLoadCallback(function(){drawChartRes('!{ReportResource}')});
+      function drawChartRes(resourcesData) {
+        var dataVisualise = JSON.parse(resourcesData)
+        window.Mytest = dataVisualise
+        var container = document.getElementById('timeLine2');
+        var chart = new google.visualization.Timeline(container);
+        var dataTable = new google.visualization.DataTable();
+
+        function prepareData(data){
+            var collection = []
+            var iterator = 1
+            for (const resources of data) {
+                collection.push([iterator.toString(),resources.name , resources.startTime, resources.responseEnd])
+                iterator++
+            }
+            return collection
+        }
+        dataTable.addColumn({ type: 'string', id: 'Term' });
+        dataTable.addColumn({ type: 'string', id: 'Name' });
+        dataTable.addColumn({ type: 'number', id: 'Start' });
+        dataTable.addColumn({ type: 'number', id: 'End' });
+        dataTable.addRows(prepareData(dataVisualise));
+
+        var options = {
+          timeline: { showRowLabels: false }
+        };
+
+        chart.draw(dataTable, options);
+        var e = document.getElementsByTagName('g') 
+        e[7].parentNode.removeChild(e[7])
+      }
   body(class='content')
    
   h1 Carrier Perf-UI Audit
@@ -120,10 +151,15 @@ html
 -   }
 - }
 
-- var marginPercent = function(element,etalon){
--   var result = (element * 100 )/ etalon
--     return 'margin-left:'+ result + '% '
+- var checkStatus = function(data){
+-   if (data == "Passed"){
+-      return "ok"
+-   }
+-   if (data == "Failured"){
+-      return "error"
+-   }
 - }
+
 .row
   .column
     .row
@@ -134,15 +170,17 @@ html
         a(href='https://github.com/carrier-io/perf-ui') Perf UI
         | &nbsp;audit helps you find performance problems on your web page.
       .eight.columns
-        h3 Page score
+        h4 Test status:&nbsp;
+          - testStatus = 'label normal ' + checkStatus(TestStatus)
+          span(class=testStatus) #{TestStatus}
+        - sLabel = 'label normal ' + trashHold(advice.score)
+        h3 Page total score:&nbsp;
+            span(class=sLabel) #{advice.score}
         ul
-          - sLabel = 'label normal ' + trashHold(advice.score)
           - pLabel = 'label normal ' + trashHold(advice.performance.score)
           - prLabel = 'label normal ' + trashHold(advice.privacy.score)
           - aLabel = 'label normal ' + trashHold(advice.accessibility.score)
           - bLabel = 'label normal ' +  trashHold(advice.bestpractice.score)
-          li.group-item Total score&nbsp;
-            span(class=sLabel) #{advice.score}
           li.group-item 
             a(href='#coach-perf') Performance score
             | &nbsp;
@@ -159,18 +197,20 @@ html
             a(href='#coach-bestpractice') Best practice score
             | &nbsp;
             span(class=bLabel) #{advice.bestpractice.score}
+      h3 Page Load Timing
       .time.colomn
         div(id='frames_container')
           each value,index in frameBase64Array
             div(id='divFrame')
               img(src='data:image/jpg;base64,'+value, alt="load frame" id='frame_'+index onclick='openFull('+index+')' class='frameImg')
-              div(id='openFull_'+index ,class='modal')
+              div(id='openFull_'+index ,class='modal', style='display:none')
                 span(class='close_'+index id='close' ) &times;
                 img(class='content', id='frameModal_'+index)
                 div(id='caption_'+index class='caption')
               div(id='frameFooter')
-        div(id='timing')
-          div(id='timeLine')
+        div(id='timeLine')
+      h3 Resource timing
+      div(id='timeLine2')
       .twelve.columns
         +adviceInfo('Accessibility advice', 'coach-access','You have a perfect accessibility score!', advice.accessibility)
         +adviceInfo('Performance advice','coach-perf','You have a perfect Performance score!', advice.performance)

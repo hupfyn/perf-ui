@@ -26,33 +26,31 @@ Demo:
             - Fender+Jaguar
         check:
             xpath: //span[contains(text(),'results')]
-    Rosetka:
-        url: https://www.rozetka.com.ua
-        check:
-            xpath: //ul[@class='main-slider__pagination']
-        # steps:
-        #     - input:
-        #         xpath: //input[@id='twotabsearchtextbox']
-        #         value: new ${SearchField2.Notebook}
-        #     - check:
-        #         xpath: //div[@id="issDiv0"]
-        #     - click:
-        #         xpath: //div[@id="issDiv0"]
-            # - input:
-            #     xpath: //input[@id='twotabsearchtextbox']
-            #     value: ${SearchField3.SearchData.LegendaryGame} pc
-            # - check:
-            #     xpath: //div[@id="issDiv0"]
-            # - click:
-            #     xpath: //div[@id="issDiv0"]
-            # - input:
-            #     xpath: //input[@id='twotabsearchtextbox']
-            #     value: new ${SearchField} game
-            # - check:
-            #     xpath: //div[@id="issDiv1"]
-            # - click:
-            #     xpath: //div[@id="issDiv1"]
-    # AmazonHome:
-    #     steps:
-    #         - executeJS: 
-    #             value: ${ScriptJS.goToHome}
+    AmazonAdvancedSearch:
+        url: https://www.amazon.com/
+        steps:
+            - input:
+                xpath: //input[@id='twotabsearchtextbox']
+                value: new ${SearchField2.Notebook}
+            - check:
+                xpath: //div[@id="issDiv0"]
+            - click:
+                xpath: //div[@id="issDiv0"]
+            - input:
+                xpath: //input[@id='twotabsearchtextbox']
+                value: ${SearchField3.SearchData.LegendaryGame} pc
+            - check:
+                xpath: //div[@id="issDiv0"]
+            - click:
+                xpath: //div[@id="issDiv0"]
+            - input:
+                xpath: //input[@id='twotabsearchtextbox']
+                value: new ${SearchField} game
+            - check:
+                xpath: //div[@id="issDiv1"]
+            - click:
+                xpath: //div[@id="issDiv1"]
+    AmazonHome:
+        steps:
+            - executeJS: 
+                value: ${ScriptJS}
