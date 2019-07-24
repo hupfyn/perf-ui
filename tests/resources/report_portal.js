@@ -34,6 +34,7 @@ function ReportPortal(config,logger) {
     }
     this.image_path = `/tmp/reports/screenshots/`;
     this.lh_path = `/tmp/reports/lighthouse_pages/`;
+    this.audit_path = `/tmp/reports/audit_pages/`;
     this.logger = logger
 }
 
