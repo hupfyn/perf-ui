@@ -2,7 +2,7 @@ var fs = require('fs')
 var pug = require('pug')
 
 async function getScriptSource() {
-    return await fs.readFileSync('./tests/resources/report_module/source_audit_script.js', 'utf8')
+    return await fs.readFileSync('/tests/resources/report_module/source_audit_script.js', 'utf8')
 }
 
 async function getPageScore(driver, pageName) {
@@ -15,7 +15,7 @@ async function getPageScore(driver, pageName) {
 }
 
 async function generateHTMLreport(pageScoreResult, pageName) {
-    var html = pug.renderFile('./tests/template/index.pug', pageScoreResult)
+    var html = pug.renderFile('/tests/template/index.pug', pageScoreResult)
     await fs.writeFileSync('/tmp/reports/page_audit/' + pageName + '.html', html)
 }
 

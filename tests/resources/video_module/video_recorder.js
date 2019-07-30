@@ -9,7 +9,7 @@ var video
 async function startRecord(pageName, logger) {
     this.videoPath = '/tmp/reports/' + pageName + '.mp4';
     this.video = await recordScreen(videoPath, {
-        resolution: '1400x900',
+        resolution: '1440x900',
         fps: 20,
         display: 20
     })
