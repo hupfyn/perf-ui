@@ -36,7 +36,7 @@ async function cutPageLoading(pageName, startMark, endMark, driver, logger) {
         resultTimestampFrame.push(index)
     }
     resultTimestampFrame.push(loadEventEnd)
-    utils.sleep(2)
+    utils.sleep(4)
     await bashExecuter(cutterComand)
     await extractFrames({
         input: '/tmp/reports/' + pageName + '_short.mp4',
