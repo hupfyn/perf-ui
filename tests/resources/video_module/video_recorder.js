@@ -2,16 +2,16 @@ var util = require('util')
 var extractFrames = require('ffmpeg-extract-frames')
 var bashExecuter = util.promisify(require('child_process').exec)
 var recordScreen = require('record-screen')
-var utils = require('/home/ivan_nahornyi/test44/perf-ui/tests/resources/utils.js')
+var utils = require('../utils')
 var video
 
 
 async function startRecord(pageName, logger) {
     this.videoPath = '/tmp/reports/' + pageName + '.mp4';
     this.video = await recordScreen(videoPath, {
-        resolution: '1366x768',
-        fps: 25,
-        display: 0
+        resolution: '1400x900',
+        fps: 20,
+        display: 20
     })
     logger.debug('Video record for '+ pageName +' is start')
 }
