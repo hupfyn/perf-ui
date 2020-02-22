@@ -22,7 +22,7 @@ var logger
 function ReportPortal(config,logger) {
     this.rpClient = new RPClient({
         token: config['rp_token'],
-        endpoint: "https://" + config['rp_host'] + "/api/v1",
+        endpoint: config['rp_host'],
         project: config['rp_project_name'],
         debug: false
     });

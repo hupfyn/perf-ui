@@ -17,7 +17,7 @@
 var webdriver = require('selenium-webdriver'),
     until = webdriver.until;
 
-const globalTimeout = require("./globalTimeout.json")
+const globalTimeout = 60000;
 
 function Waiter(driver) {
     this.driver = driver;
@@ -25,22 +25,22 @@ function Waiter(driver) {
 
 Waiter.prototype.waitFor = async function (locator, timeout) {
     var waitTimeout = timeout || globalTimeout;
-    var webelement = await this.driver.wait(until.elementLocated(locator), waitTimeout)
-    return webelement
+    var webElement = await this.driver.wait(until.elementLocated(locator), waitTimeout);
+    return webElement;
 };
 
 Waiter.prototype.waitUntilVisible = async function (webelement, timeout) {
     var waitTimeout = timeout || globalTimeout;
-    await this.driver.wait(until.elementIsVisible(webelement), waitTimeout)
+    await this.driver.wait(until.elementIsVisible(webelement), waitTimeout);
 };
 
 Waiter.prototype.waitUntilNotVisible = async function (webelement, timeout) {
     var waitTimeout = timeout || globalTimeout;
-    await this.driver.wait(until.elementIsNotVisible(webelement), waitTimeout)
+    await this.driver.wait(until.elementIsNotVisible(webelement), waitTimeout);
 };
 
 Waiter.prototype.findElement = async function (locator) {
     await this.driver.findElement(locator);
 };
 
-module.exports = Waiter
+module.exports = Waiter;

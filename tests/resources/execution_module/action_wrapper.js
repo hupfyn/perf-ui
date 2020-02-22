@@ -12,7 +12,7 @@ module.exports = {
         if (step[1] == 'id') {
             if (step[2] instanceof Number){
                 return step[2]
-            }
+            } 
             else{
                 return By.id(step[2])
             }
@@ -42,14 +42,17 @@ module.exports = {
     ExecuteClick: async function (driver, locator) {
         await driver.findElement(locator).click()
     },
-    ExecuteInput: async function (driver, locator, value) {
+    ExecuteInput: async function (driver, locator, value, submit) {
         await driver.findElement(locator).clear()
         await driver.findElement(locator).sendKeys(value)
+        if (submit) {
+            driver.findElement(locator).submit()
+        }
     },
     ExecuteCheckIsPresent: async function (waiter, locator) {
         await waiter.waitFor(locator).then((element) => waiter.waitUntilVisible(element))
     },
-    
+
     ExecuteCheckIsNotPresent: async function (waiter, locator) {
         await waiter.waitFor(locator).then((element) => waiter.waitUntilNotVisible(element))
     },

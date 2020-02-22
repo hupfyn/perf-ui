@@ -32,7 +32,7 @@ RUN apt-get -qqy update \
   && rm -rf /var/lib/apt/lists/* \
   && sed -i 's/securerandom\.source=file:\/dev\/random/securerandom\.source=file:\/dev\/urandom/' ./usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/java.security
 
-RUN wget -qO- https://deb.nodesource.com/setup_10.x | bash -
+RUN wget -qO- https://deb.nodesource.com/setup_12.x | bash -
 RUN apt-get install -y nodejs default-jre
 
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -

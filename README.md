@@ -113,6 +113,7 @@ Demo:                                         # Test Suite
       - input:                                        # Input Action (Entering data into specified field)
           xpath: //input[@id='search-query']            # locator for WebElement (You can use "xpath,css,id,name,class" type of locators)
           value: shirt                                  # data which you want to enter
+          submit: true                                  # optional parameter in case when you have to submit form (Default:false)
 
       - check:                                        # Check Action (check page state or WebElement state)
           xpath: //button[@value='Search']              # locator for WebElement (You can use "xpath,css,id,name,class" type of locators)

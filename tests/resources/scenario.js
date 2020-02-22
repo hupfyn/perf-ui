@@ -14,8 +14,7 @@
    limitations under the License.
 */
 
-const { By,
-    Builder
+const { Builder
 } = require('selenium-webdriver')
 
 require('chromedriver');
@@ -56,28 +55,20 @@ ScenarioBuilder.prototype.InitDriver = async function () {
         .setAlertBehavior('accept')
         .forBrowser('chrome').build();
     outer_this.waiter = new Waiter(this.driver)
-    await outer_this.driver.get("chrome://version");
-    let element = await outer_this.driver.findElement(By.id('command_line'));
-    let text = await element.getText();
-    var splitStr = text.split(" ");
-    let port = 0
-    splitStr.filter(function (word, index) {
-        if (word.match(/--remote-debugging-port=*/)) {
-            port = Number(word.split('=')[1]);
-            lighthouseOptionsDesktop.port = port;
-            lighthouseOptionsMobile.port = port;
-        } else { }
-    });
 }
 
 var lighthouseOptionsDesktop = {
     chromeFlags: ['--show-paint-rects', '--window-size=1440,900'],
     "emulatedFormFactor": "none",
-    "output": "html"
+    "output": "html",
+    "disableStorageReset": true,
+    "port": 9222
 }
 var lighthouseOptionsMobile = {
     chromeFlags: ['--show-paint-rects', '--window-size=1440,900'],
-    "output": "html"
+    "output": "html",
+    "disableStorageReset": true,
+    "port": 9222
 }
 const browserCapabilities = {
     "browserName": 'chrome',
@@ -125,7 +116,7 @@ ScenarioBuilder.prototype.ExecuteTest = async function (baseUrl, pageCheck, step
         outer_this.consoleLogger.debug("Execute "+ actionStep[0] +" "+ locator + " step")
         switch (actionStep[0]) {
             case 'input':
-                await WebDriverActionWrapper.ExecuteInput(outer_this.driver, locator, actionStep[3])
+                await WebDriverActionWrapper.ExecuteInput(outer_this.driver, locator, actionStep[3],actionStep[4])
                 break;
             case 'check':
                 await WebDriverActionWrapper.ExecuteCheckIsPresent(outer_this.waiter, locator)
